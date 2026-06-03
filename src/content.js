@@ -415,7 +415,6 @@
         <kbd>d/u</kbd><span>scroll half-page down/up</span>
         <kbd>gg/G</kbd><span>top/bottom of page</span>
         <kbd>f/F</kbd><span>hint-click / open hinted link in a background tab</span>
-        <kbd>H/L</kbd><span>history back/forward</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
         <kbd>r</kbd><span>reload tab</span>
         <kbd>o/O</kbd><span>open URL/search in current tab / new tab</span>
@@ -479,8 +478,6 @@
         break;
       case "f": startHints(false); break;
       case "F": startHints(true); break;
-      case "H": history.back(); break;
-      case "L": history.forward(); break;
       case "J": send("previousTab"); break;
       case "K": send("nextTab"); break;
       case "r": send("reload"); break;
