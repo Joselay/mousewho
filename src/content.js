@@ -73,33 +73,6 @@
         }
         .hint.miss { display: none; }
         .hint.match { background: #22c55e; border-color: #14532d; color: #052e16; }
-        .bar {
-          position: fixed;
-          left: 50%;
-          top: 18px;
-          transform: translateX(-50%);
-          width: min(720px, calc(100vw - 28px));
-          display: flex;
-          gap: 8px;
-          align-items: center;
-          padding: 9px;
-          color: #e5e7eb;
-          background: rgba(15, 23, 42, 0.96);
-          border: 1px solid rgba(148, 163, 184, 0.32);
-          border-radius: 12px;
-          box-shadow: 0 16px 48px rgba(0, 0, 0, 0.32);
-          pointer-events: auto;
-          font: 13px/1.35 system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        }
-        .bar label { flex: 0 0 auto; color: #93c5fd; font-weight: 700; }
-        .bar input {
-          all: initial;
-          flex: 1 1 auto;
-          min-width: 0;
-          color: #f8fafc;
-          caret-color: #f8fafc;
-          font: 15px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
-        }
         .help {
           position: fixed;
           left: 50%;
@@ -134,7 +107,6 @@
   }
 
   function clearTransientPanels() {
-    clearPanel("find");
     clearPanel("help");
   }
 
@@ -317,47 +289,6 @@
     clickElement(element);
   }
 
-  function startFind() {
-    stopHints();
-    clearTransientPanels();
-    mode = "find";
-
-    const root = ensureRoot();
-    const bar = document.createElement("form");
-    bar.className = "bar";
-    bar.dataset.panel = "find";
-    bar.innerHTML = `<label>find</label><input autocomplete="off" spellcheck="false" placeholder="Find in page" />`;
-    root.appendChild(bar);
-    const input = bar.querySelector("input");
-    input.focus();
-
-    function run(backward = false) {
-      if (!input.value) return;
-      const ok = window.find(input.value, false, backward, true, false, false, false);
-      if (!ok) hud("not found");
-    }
-
-    bar.addEventListener("submit", (event) => {
-      event.preventDefault();
-      run(event.shiftKey);
-    });
-    input.addEventListener("input", () => run(false));
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeModePanel("find");
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        run(event.shiftKey);
-      }
-    });
-  }
-
-  function closeModePanel(kind) {
-    clearPanel(kind);
-    if (mode === kind) mode = "normal";
-  }
-
   function showHelp() {
     stopHints();
     clearTransientPanels();
@@ -376,7 +307,6 @@
         <kbd>gg/G</kbd><span>top/bottom of page</span>
         <kbd>f/F</kbd><span>hint-click / open hinted link in a background tab</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
-        <kbd>/</kbd><span>lightweight find in page</span>
         <kbd>i</kbd><span>focus first visible text input</span>
         <kbd>?</kbd><span>toggle this help</span>
         <kbd>Esc</kbd><span>exit current mode</span>
@@ -438,7 +368,6 @@
       case "F": startHints(true); break;
       case "J": send("previousTab"); break;
       case "K": send("nextTab"); break;
-      case "/": startFind(); break;
       case "i": focusFirstInput(); break;
       case "?": showHelp(); break;
       case "Escape": stopHints(); clearTransientPanels(); mode = "normal"; break;

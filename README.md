@@ -19,7 +19,6 @@ Mousewho is a Manifest V3 Chrome extension for fast keyboard-only browsing with 
 | `f` | Show fast hints and click the selected target |
 | `F` | Show hints and open the selected link in a background tab |
 | `J` / `K` | Previous / next tab |
-| `/` | Lightweight find-in-page prompt |
 | `i` | Focus first visible text input |
 | `?` | Show in-page help |
 | `Esc` | Exit the current Mousewho mode |
