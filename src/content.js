@@ -365,7 +365,11 @@
 
   document.addEventListener("keydown", (event) => {
     if (mode === "insert") {
-      if (event.key === "Escape" || (event.ctrlKey && event.key === "[")) {
+      if (event.key === "Escape") {
+        exitInsertMode();
+        return;
+      }
+      if (event.ctrlKey && event.key === "[") {
         event.preventDefault();
         event.stopPropagation();
         exitInsertMode();
@@ -384,7 +388,11 @@
     }
     if (mode === "normal" && Dom.isEditableTarget(event.target)) {
       enterInsertMode(false);
-      if (event.key === "Escape" || (event.ctrlKey && event.key === "[")) {
+      if (event.key === "Escape") {
+        exitInsertMode();
+        return;
+      }
+      if (event.ctrlKey && event.key === "[") {
         event.preventDefault();
         event.stopPropagation();
         exitInsertMode();
