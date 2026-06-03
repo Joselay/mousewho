@@ -177,6 +177,18 @@
     if (mode === "hints") mode = "normal";
   }
 
+  function enterInsertMode(notify = true) {
+    mode = "insert";
+    if (notify) hud("-- INSERT --", 700);
+  }
+
+  function exitInsertMode(notify = true) {
+    const active = document.activeElement;
+    if (Dom.isEditableTarget(active) && active.blur) active.blur();
+    mode = "normal";
+    if (notify) hud("-- NORMAL --", 700);
+  }
+
   function updateHintFilter() {
     if (!hintState) return;
     const { labels, markers, prefix } = hintState;
@@ -226,6 +238,7 @@
 
     if (element.matches(Dom.EDITABLE_SELECTOR)) {
       element.focus({ preventScroll: false });
+      enterInsertMode();
       return;
     }
     clickElement(element);
@@ -249,9 +262,9 @@
         <kbd>gg/G</kbd><span>top/bottom of page</span>
         <kbd>f/F</kbd><span>hint-click / open hinted link in a background tab</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
-        <kbd>i</kbd><span>focus first visible text input</span>
+        <kbd>i</kbd><span>focus first visible text input and enter insert mode</span>
         <kbd>?</kbd><span>toggle this help</span>
-        <kbd>Esc</kbd><span>exit current mode</span>
+        <kbd>Esc</kbd><span>exit hints/help or blur input from insert mode</span>
       </div>
     `;
     root.appendChild(help);
@@ -262,6 +275,7 @@
     const input = Dom.findFirstVisibleInput();
     if (input) {
       input.focus();
+      enterInsertMode();
       return;
     }
     hud("no input found");
@@ -350,6 +364,14 @@
   }
 
   document.addEventListener("keydown", (event) => {
+    if (mode === "insert") {
+      if (event.key === "Escape" || (event.ctrlKey && event.key === "[")) {
+        event.preventDefault();
+        event.stopPropagation();
+        exitInsertMode();
+      }
+      return;
+    }
     if (mode === "hints") {
       handleHintKey(event);
       return;
@@ -360,7 +382,29 @@
       mode = "normal";
       return;
     }
+    if (mode === "normal" && Dom.isEditableTarget(event.target)) {
+      enterInsertMode(false);
+      if (event.key === "Escape" || (event.ctrlKey && event.key === "[")) {
+        event.preventDefault();
+        event.stopPropagation();
+        exitInsertMode();
+      }
+      return;
+    }
     if (mode !== "normal") return;
     handleNormalKey(event);
+  }, true);
+
+  document.addEventListener("focusin", (event) => {
+    if ((mode === "normal" || mode === "insert") && Dom.isEditableTarget(event.target)) {
+      enterInsertMode(mode !== "insert");
+    }
+  }, true);
+
+  document.addEventListener("focusout", () => {
+    if (mode !== "insert") return;
+    setTimeout(() => {
+      if (mode === "insert" && !Dom.isEditableTarget(document.activeElement)) mode = "normal";
+    }, 0);
   }, true);
 })();
