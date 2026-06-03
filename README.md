@@ -23,8 +23,6 @@ Mousewho is a Manifest V3 Chrome extension for fast keyboard-only browsing with 
 | `?` | Show in-page help |
 | `Esc` | Exit the current Mousewho mode |
 
-Chrome does not expose an extension API to focus the omnibox directly. Use Chrome's native `Ctrl+L` / `⌘L`, or `Ctrl+T` / `⌘T` for a new tab.
-
 ## Performance approach
 
 - Normal scrolling and navigation are direct keydown handlers with no page scans.

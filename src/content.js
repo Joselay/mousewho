@@ -311,7 +311,6 @@
         <kbd>?</kbd><span>toggle this help</span>
         <kbd>Esc</kbd><span>exit current mode</span>
       </div>
-      <p>Chrome does not expose an API to focus the omnibox; use native <kbd>Ctrl/⌘+L</kbd> or <kbd>Ctrl/⌘+T</kbd>.</p>
     `;
     root.appendChild(help);
     help.focus({ preventScroll: true });
