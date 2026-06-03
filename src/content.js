@@ -134,7 +134,6 @@
   }
 
   function clearTransientPanels() {
-    clearPanel("open");
     clearPanel("find");
     clearPanel("help");
   }
@@ -318,45 +317,6 @@
     clickElement(element);
   }
 
-  function normalizeDestination(value) {
-    const input = value.trim();
-    if (!input) return "";
-    if (/^[a-z][a-z0-9+.-]*:/i.test(input)) return input;
-    if (/^(localhost|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?(?:[/?#].*)?$/i.test(input)) return `http://${input}`;
-    if (/^[^\s./?#]+(?:\.[^\s./?#]+)+(?:[/?#].*)?$/i.test(input)) return `https://${input}`;
-    return `https://www.google.com/search?q=${encodeURIComponent(input)}`;
-  }
-
-  function openPrompt(newTab) {
-    stopHints();
-    clearTransientPanels();
-    mode = "open";
-
-    const root = ensureRoot();
-    const bar = document.createElement("form");
-    bar.className = "bar";
-    bar.dataset.panel = "open";
-    bar.innerHTML = `<label>${newTab ? "tab" : "open"}</label><input autocomplete="off" spellcheck="false" placeholder="URL or search" />`;
-    root.appendChild(bar);
-    const input = bar.querySelector("input");
-    input.focus();
-
-    bar.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const url = normalizeDestination(input.value);
-      closeModePanel("open");
-      if (!url) return;
-      if (newTab) send("openTab", { url, active: true });
-      else location.assign(url);
-    });
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        closeModePanel("open");
-      }
-    });
-  }
-
   function startFind() {
     stopHints();
     clearTransientPanels();
@@ -416,13 +376,12 @@
         <kbd>gg/G</kbd><span>top/bottom of page</span>
         <kbd>f/F</kbd><span>hint-click / open hinted link in a background tab</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
-        <kbd>o/O</kbd><span>open URL/search in current tab / new tab</span>
         <kbd>/</kbd><span>lightweight find in page</span>
         <kbd>i</kbd><span>focus first visible text input</span>
         <kbd>?</kbd><span>toggle this help</span>
         <kbd>Esc</kbd><span>exit current mode</span>
       </div>
-      <p>Chrome does not expose an API to focus the omnibox; use native <kbd>Ctrl/⌘+L</kbd> or Mousewho's <kbd>o</kbd> prompt.</p>
+      <p>Chrome does not expose an API to focus the omnibox; use native <kbd>Ctrl/⌘+L</kbd> or <kbd>Ctrl/⌘+T</kbd>.</p>
     `;
     root.appendChild(help);
     help.focus({ preventScroll: true });
@@ -479,8 +438,6 @@
       case "F": startHints(true); break;
       case "J": send("previousTab"); break;
       case "K": send("nextTab"); break;
-      case "o": openPrompt(false); break;
-      case "O": openPrompt(true); break;
       case "/": startFind(); break;
       case "i": focusFirstInput(); break;
       case "?": showHelp(); break;
