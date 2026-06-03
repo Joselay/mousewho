@@ -1,5 +1,15 @@
 "use strict";
 
+const TAB_MESSAGE_DIRECTIONS = Object.freeze({
+  nextTab: 1,
+  previousTab: -1
+});
+
+const TAB_COMMAND_DIRECTIONS = Object.freeze({
+  "next-tab": 1,
+  "previous-tab": -1
+});
+
 async function switchTab(direction) {
   const tabs = await chrome.tabs.query({ currentWindow: true });
   if (!tabs.length) return;
@@ -8,27 +18,31 @@ async function switchTab(direction) {
   await chrome.tabs.update(tabs[nextIndex].id, { active: true });
 }
 
-chrome.runtime.onMessage.addListener((message, sender) => {
-  (async () => {
-    switch (message && message.command) {
-      case "nextTab":
-        await switchTab(1);
-        break;
-      case "previousTab":
-        await switchTab(-1);
-        break;
-      case "openTab":
-        if (message.url) await chrome.tabs.create({ url: message.url, active: Boolean(message.active) });
-        break;
-      default:
-        break;
-    }
-  })().catch(() => {
+async function openTab(url, active) {
+  if (url) await chrome.tabs.create({ url, active: Boolean(active) });
+}
+
+async function handleRuntimeMessage(message) {
+  const command = message && message.command;
+  if (Object.prototype.hasOwnProperty.call(TAB_MESSAGE_DIRECTIONS, command)) {
+    await switchTab(TAB_MESSAGE_DIRECTIONS[command]);
+    return;
+  }
+  if (command === "openTab") await openTab(message.url, message.active);
+}
+
+function ignoreFailure(promise) {
+  promise.catch(() => {
     // Keep keyboard handling snappy; background failures are non-fatal.
   });
+}
+
+chrome.runtime.onMessage.addListener((message) => {
+  ignoreFailure(handleRuntimeMessage(message));
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  if (command === "next-tab") switchTab(1);
-  if (command === "previous-tab") switchTab(-1);
+  if (Object.prototype.hasOwnProperty.call(TAB_COMMAND_DIRECTIONS, command)) {
+    ignoreFailure(switchTab(TAB_COMMAND_DIRECTIONS[command]));
+  }
 });

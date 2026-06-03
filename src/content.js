@@ -5,6 +5,7 @@
   window.__mousewhoLoaded = true;
 
   const Hints = window.MousewhoHints;
+  const Dom = window.MousewhoDom;
   const SCROLL_STEP = 64;
   const HINT_LIMIT = 700;
   const G_SEQUENCE_MS = 650;
@@ -124,67 +125,8 @@
     hudTimer = setTimeout(() => node.remove(), ttl);
   }
 
-  function isEditable(target) {
-    if (!target || target === document || target === window) return false;
-    const element = target.nodeType === Node.ELEMENT_NODE ? target : target.parentElement;
-    if (!element) return false;
-    if (element.isContentEditable) return true;
-    const editable = element.closest("input, textarea, select, [contenteditable=''], [contenteditable='true'], [role='textbox'], [role='searchbox']");
-    if (!editable) return false;
-    if (editable.matches("input")) {
-      const type = (editable.getAttribute("type") || "text").toLowerCase();
-      return !["button", "checkbox", "color", "file", "hidden", "image", "radio", "range", "reset", "submit"].includes(type);
-    }
-    return true;
-  }
-
-  function isVisibleCandidate(element) {
-    if (!(element instanceof Element)) return false;
-    if (element.disabled || element.getAttribute("aria-hidden") === "true") return false;
-    const rects = element.getClientRects();
-    if (!rects.length) return false;
-    const style = getComputedStyle(element);
-    if (style.visibility === "hidden" || style.display === "none" || Number(style.opacity) === 0) return false;
-
-    for (let i = 0; i < rects.length; i += 1) {
-      const rect = rects[i];
-      if (rect.width < 2 || rect.height < 2) continue;
-      if (rect.bottom < 0 || rect.right < 0 || rect.top > innerHeight || rect.left > innerWidth) continue;
-      return true;
-    }
-    return false;
-  }
-
-  function markerPoint(element) {
-    const rects = element.getClientRects();
-    for (let i = 0; i < rects.length; i += 1) {
-      const rect = rects[i];
-      if (rect.width < 2 || rect.height < 2) continue;
-      if (rect.bottom < 0 || rect.right < 0 || rect.top > innerHeight || rect.left > innerWidth) continue;
-      return {
-        x: Math.max(2, Math.min(innerWidth - 2, rect.left + Math.min(rect.width / 2, 24))),
-        y: Math.max(8, Math.min(innerHeight - 2, rect.top + Math.min(rect.height / 2, 12))),
-        top: rect.top,
-        left: rect.left
-      };
-    }
-    return null;
-  }
-
   function collectCandidates() {
-    const found = [];
-    const seen = new Set();
-    const nodes = document.querySelectorAll(Hints.CLICKABLE_SELECTOR);
-    for (let i = 0; i < nodes.length && found.length < HINT_LIMIT; i += 1) {
-      const element = nodes[i];
-      if (seen.has(element) || !isVisibleCandidate(element)) continue;
-      const point = markerPoint(element);
-      if (!point) continue;
-      seen.add(element);
-      found.push({ element, point });
-    }
-    found.sort((a, b) => (a.point.top - b.point.top) || (a.point.left - b.point.left));
-    return found;
+    return Dom.collectVisibleCandidates(Hints.CLICKABLE_SELECTOR, { limit: HINT_LIMIT });
   }
 
   function startHints(openInNewTab) {
@@ -282,7 +224,7 @@
       return;
     }
 
-    if (element.matches("input, textarea, select, [contenteditable=''], [contenteditable='true'], [role='textbox'], [role='searchbox']")) {
+    if (element.matches(Dom.EDITABLE_SELECTOR)) {
       element.focus({ preventScroll: false });
       return;
     }
@@ -317,12 +259,10 @@
   }
 
   function focusFirstInput() {
-    const nodes = document.querySelectorAll("input:not([type='hidden']), textarea, [contenteditable=''], [contenteditable='true'], [role='textbox'], [role='searchbox']");
-    for (let i = 0; i < nodes.length; i += 1) {
-      if (isVisibleCandidate(nodes[i])) {
-        nodes[i].focus();
-        return;
-      }
+    const input = Dom.findFirstVisibleInput();
+    if (input) {
+      input.focus();
+      return;
     }
     hud("no input found");
   }
@@ -342,7 +282,7 @@
 
   function handleNormalKey(event) {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return false;
-    if (isEditable(event.target)) return false;
+    if (Dom.isEditableTarget(event.target)) return false;
 
     const key = event.key;
     let handled = true;
