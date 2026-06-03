@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Mousewho",
+  "description": "Blazing-fast keyboard-only Chrome control for Vim-style browsing.",
+  "version": "0.1.0",
+  "minimum_chrome_version": "114",
+  "permissions": ["tabs"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/hints.js", "src/content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "commands": {
+    "next-tab": {
+      "suggested_key": { "default": "Alt+Shift+L", "mac": "Alt+Shift+L" },
+      "description": "Activate the next tab"
+    },
+    "previous-tab": {
+      "suggested_key": { "default": "Alt+Shift+H", "mac": "Alt+Shift+H" },
+      "description": "Activate the previous tab"
+    }
+  }
+}

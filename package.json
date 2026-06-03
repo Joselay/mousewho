@@ -1,0 +1,18 @@
+{
+  "name": "mousewho",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Blazing-fast keyboard-only Chrome control for Vim-style browsing.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/*.test.js && node --check src/background.js && node --check src/content.js && node --check src/hints.js",
+    "benchmark": "node benchmark/hints-benchmark.js"
+  },
+  "keywords": [
+    "chrome-extension",
+    "vim",
+    "keyboard",
+    "browser"
+  ],
+  "license": "MIT"
+}
