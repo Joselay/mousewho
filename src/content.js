@@ -416,7 +416,6 @@
         <kbd>gg/G</kbd><span>top/bottom of page</span>
         <kbd>f/F</kbd><span>hint-click / open hinted link in a background tab</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
-        <kbd>r</kbd><span>reload tab</span>
         <kbd>o/O</kbd><span>open URL/search in current tab / new tab</span>
         <kbd>/</kbd><span>lightweight find in page</span>
         <kbd>i</kbd><span>focus first visible text input</span>
@@ -480,7 +479,6 @@
       case "F": startHints(true); break;
       case "J": send("previousTab"); break;
       case "K": send("nextTab"); break;
-      case "r": send("reload"); break;
       case "o": openPrompt(false); break;
       case "O": openPrompt(true); break;
       case "/": startFind(); break;

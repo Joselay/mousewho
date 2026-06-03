@@ -1,10 +1,5 @@
 "use strict";
 
-async function getActiveTab() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  return tab;
-}
-
 async function switchTab(direction) {
   const tabs = await chrome.tabs.query({ currentWindow: true });
   if (!tabs.length) return;
@@ -25,11 +20,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       case "openTab":
         if (message.url) await chrome.tabs.create({ url: message.url, active: Boolean(message.active) });
         break;
-      case "reload": {
-        const tab = sender.tab || await getActiveTab();
-        if (tab && tab.id) await chrome.tabs.reload(tab.id);
-        break;
-      }
       default:
         break;
     }
