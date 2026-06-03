@@ -22,14 +22,6 @@ chrome.runtime.onMessage.addListener((message, sender) => {
       case "previousTab":
         await switchTab(-1);
         break;
-      case "closeTab": {
-        const tabId = sender.tab && sender.tab.id;
-        if (tabId) await chrome.tabs.remove(tabId);
-        break;
-      }
-      case "newTab":
-        await chrome.tabs.create({ active: true });
-        break;
       case "openTab":
         if (message.url) await chrome.tabs.create({ url: message.url, active: Boolean(message.active) });
         break;

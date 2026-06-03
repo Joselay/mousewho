@@ -418,7 +418,6 @@
         <kbd>H/L</kbd><span>history back/forward</span>
         <kbd>J/K</kbd><span>previous/next tab</span>
         <kbd>r</kbd><span>reload tab</span>
-        <kbd>t/x</kbd><span>new tab / close tab</span>
         <kbd>o/O</kbd><span>open URL/search in current tab / new tab</span>
         <kbd>/</kbd><span>lightweight find in page</span>
         <kbd>i</kbd><span>focus first visible text input</span>
@@ -485,8 +484,6 @@
       case "J": send("previousTab"); break;
       case "K": send("nextTab"); break;
       case "r": send("reload"); break;
-      case "x": send("closeTab"); break;
-      case "t": send("newTab"); break;
       case "o": openPrompt(false); break;
       case "O": openPrompt(true); break;
       case "/": startFind(); break;
