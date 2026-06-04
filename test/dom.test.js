@@ -73,6 +73,7 @@ test("detects editable keyboard targets", () => {
   const { Element: FakeElement } = createFakeWindow();
   const textInput = new FakeElement({ tagName: "input", attributes: { type: "text" } });
   const buttonInput = new FakeElement({ tagName: "input", attributes: { type: "button" } });
+  const checkboxInput = new FakeElement({ tagName: "input", attributes: { type: "checkbox" } });
   const contentEditable = new FakeElement({ attributes: { contenteditable: "true" } });
   const textNode = { nodeType: 3, parentElement: textInput };
 
@@ -80,6 +81,7 @@ test("detects editable keyboard targets", () => {
   assert.equal(isEditableTarget(textNode), true);
   assert.equal(isEditableTarget(contentEditable), true);
   assert.equal(isEditableTarget(buttonInput), false);
+  assert.equal(isEditableTarget(checkboxInput), false);
 });
 
 test("filters visible candidates using geometry and computed style", () => {

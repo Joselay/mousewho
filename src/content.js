@@ -236,7 +236,7 @@
       return;
     }
 
-    if (element.matches(Dom.EDITABLE_SELECTOR)) {
+    if (Dom.isEditableTarget(element)) {
       element.focus({ preventScroll: false });
       enterInsertMode();
       return;
