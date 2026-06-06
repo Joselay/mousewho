@@ -10,6 +10,10 @@ const TAB_COMMAND_DIRECTIONS = Object.freeze({
   "previous-tab": -1
 });
 
+function hasOwn(object, key) {
+  return Object.prototype.hasOwnProperty.call(object, key);
+}
+
 async function switchTab(direction) {
   const tabs = await chrome.tabs.query({ currentWindow: true });
   if (!tabs.length) return;
@@ -24,7 +28,7 @@ async function openTab(url, active) {
 
 async function handleRuntimeMessage(message) {
   const command = message && message.command;
-  if (Object.prototype.hasOwnProperty.call(TAB_MESSAGE_DIRECTIONS, command)) {
+  if (hasOwn(TAB_MESSAGE_DIRECTIONS, command)) {
     await switchTab(TAB_MESSAGE_DIRECTIONS[command]);
     return;
   }
@@ -42,7 +46,7 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 chrome.commands.onCommand.addListener((command) => {
-  if (Object.prototype.hasOwnProperty.call(TAB_COMMAND_DIRECTIONS, command)) {
+  if (hasOwn(TAB_COMMAND_DIRECTIONS, command)) {
     ignoreFailure(switchTab(TAB_COMMAND_DIRECTIONS[command]));
   }
 });

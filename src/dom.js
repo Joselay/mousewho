@@ -36,9 +36,8 @@
   ].join(",");
 
   function getOwnerWindow(element) {
-    if (element && element.ownerDocument && element.ownerDocument.defaultView) {
-      return element.ownerDocument.defaultView;
-    }
+    const ownerDocument = element && element.ownerDocument;
+    if (ownerDocument && ownerDocument.defaultView) return ownerDocument.defaultView;
     return typeof window !== "undefined" ? window : null;
   }
 
@@ -66,8 +65,9 @@
       const type = (element.getAttribute("type") || "text").toLowerCase();
       return !NON_TEXT_INPUT_TYPES.has(type);
     }
-    if (element.getAttribute && element.getAttribute("contenteditable") !== null) {
-      return element.getAttribute("contenteditable").toLowerCase() !== "false";
+    if (element.getAttribute) {
+      const contentEditable = element.getAttribute("contenteditable");
+      if (contentEditable !== null) return contentEditable.toLowerCase() !== "false";
     }
     return true;
   }

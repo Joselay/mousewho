@@ -107,10 +107,6 @@
     if (node) node.remove();
   }
 
-  function clearTransientPanels() {
-    clearPanel("help");
-  }
-
   function hud(text, ttl = 900) {
     const root = ensureRoot();
     let node = root.querySelector('[data-panel="hud"]');
@@ -125,15 +121,11 @@
     hudTimer = setTimeout(() => node.remove(), ttl);
   }
 
-  function collectCandidates() {
-    return Dom.collectVisibleCandidates(Hints.CLICKABLE_SELECTOR, { limit: HINT_LIMIT });
-  }
-
   function startHints(openInNewTab) {
     stopHints();
-    clearTransientPanels();
+    clearPanel("help");
     const startedAt = performance.now();
-    const candidates = collectCandidates();
+    const candidates = Dom.collectVisibleCandidates(Hints.CLICKABLE_SELECTOR, { limit: HINT_LIMIT });
     if (!candidates.length) {
       hud("no clickable targets");
       return;
@@ -246,7 +238,7 @@
 
   function showHelp() {
     stopHints();
-    clearTransientPanels();
+    clearPanel("help");
     mode = "help";
     const root = ensureRoot();
     const help = document.createElement("div");
@@ -294,6 +286,16 @@
     pendingGTimer = 0;
   }
 
+  function handleInsertExitKey(event) {
+    if (event.key === "Escape") {
+      exitInsertMode();
+    } else if (event.ctrlKey && event.key === "[") {
+      event.preventDefault();
+      event.stopPropagation();
+      exitInsertMode();
+    }
+  }
+
   function handleNormalKey(event) {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return false;
     if (Dom.isEditableEventTarget(event)) return false;
@@ -323,7 +325,7 @@
       case "K": send("nextTab"); break;
       case "i": focusFirstInput(); break;
       case "?": showHelp(); break;
-      case "Escape": stopHints(); clearTransientPanels(); mode = "normal"; break;
+      case "Escape": stopHints(); clearPanel("help"); mode = "normal"; break;
       default: handled = false;
     }
 
@@ -365,15 +367,7 @@
 
   document.addEventListener("keydown", (event) => {
     if (mode === "insert") {
-      if (event.key === "Escape") {
-        exitInsertMode();
-        return;
-      }
-      if (event.ctrlKey && event.key === "[") {
-        event.preventDefault();
-        event.stopPropagation();
-        exitInsertMode();
-      }
+      handleInsertExitKey(event);
       return;
     }
     if (mode === "hints") {
@@ -388,15 +382,7 @@
     }
     if (mode === "normal" && Dom.isEditableEventTarget(event)) {
       enterInsertMode(false);
-      if (event.key === "Escape") {
-        exitInsertMode();
-        return;
-      }
-      if (event.ctrlKey && event.key === "[") {
-        event.preventDefault();
-        event.stopPropagation();
-        exitInsertMode();
-      }
+      handleInsertExitKey(event);
       return;
     }
     if (mode !== "normal") return;
