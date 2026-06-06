@@ -296,7 +296,7 @@
 
   function handleNormalKey(event) {
     if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return false;
-    if (Dom.isEditableTarget(event.target)) return false;
+    if (Dom.isEditableEventTarget(event)) return false;
 
     const key = event.key;
     let handled = true;
@@ -386,7 +386,7 @@
       mode = "normal";
       return;
     }
-    if (mode === "normal" && Dom.isEditableTarget(event.target)) {
+    if (mode === "normal" && Dom.isEditableEventTarget(event)) {
       enterInsertMode(false);
       if (event.key === "Escape") {
         exitInsertMode();
@@ -404,7 +404,7 @@
   }, true);
 
   document.addEventListener("focusin", (event) => {
-    if ((mode === "normal" || mode === "insert") && Dom.isEditableTarget(event.target)) {
+    if ((mode === "normal" || mode === "insert") && Dom.isEditableEventTarget(event)) {
       enterInsertMode(mode !== "insert");
     }
   }, true);

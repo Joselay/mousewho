@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const {
   collectVisibleCandidates,
+  isEditableEventTarget,
   isEditableTarget,
   isVisibleCandidate,
   markerPoint
@@ -18,6 +19,7 @@ function createFakeWindow() {
       this.rects = options.rects || [];
       this.attributes = Object.assign({}, options.attributes);
       this.styleState = Object.assign({ visibility: "visible", display: "block", opacity: "1" }, options.styleState);
+      this.shadowRoot = options.shadowRoot || null;
       this.ownerDocument = { defaultView: fakeWindow };
     }
 
@@ -39,6 +41,7 @@ function createFakeWindow() {
       if (selector.includes("input") && this.tagName === "INPUT") return true;
       if (selector.includes("textarea") && this.tagName === "TEXTAREA") return true;
       if (selector.includes("select") && this.tagName === "SELECT") return true;
+      if (selector.includes("[contenteditable]") && Object.prototype.hasOwnProperty.call(this.attributes, "contenteditable")) return true;
       if (selector.includes("[contenteditable='true']") && this.attributes.contenteditable === "true") return true;
       if (selector.includes("[contenteditable='']") && this.attributes.contenteditable === "") return true;
       if (selector.includes("[role='textbox']") && this.attributes.role === "textbox") return true;
@@ -75,13 +78,38 @@ test("detects editable keyboard targets", () => {
   const buttonInput = new FakeElement({ tagName: "input", attributes: { type: "button" } });
   const checkboxInput = new FakeElement({ tagName: "input", attributes: { type: "checkbox" } });
   const contentEditable = new FakeElement({ attributes: { contenteditable: "true" } });
+  const plainTextEditable = new FakeElement({ attributes: { contenteditable: "plaintext-only" } });
+  const disabledEditable = new FakeElement({ attributes: { contenteditable: "false" } });
   const textNode = { nodeType: 3, parentElement: textInput };
 
   assert.equal(isEditableTarget(textInput), true);
   assert.equal(isEditableTarget(textNode), true);
   assert.equal(isEditableTarget(contentEditable), true);
+  assert.equal(isEditableTarget(plainTextEditable), true);
+  assert.equal(isEditableTarget(disabledEditable), false);
   assert.equal(isEditableTarget(buttonInput), false);
   assert.equal(isEditableTarget(checkboxInput), false);
+});
+
+test("detects editable targets retargeted through shadow DOM events", () => {
+  const { Element: FakeElement } = createFakeWindow();
+  const host = new FakeElement();
+  const shadowInput = new FakeElement({ tagName: "input", attributes: { type: "text" } });
+  const event = {
+    target: host,
+    composedPath: () => [shadowInput, host]
+  };
+
+  assert.equal(isEditableTarget(host), false);
+  assert.equal(isEditableEventTarget(event), true);
+});
+
+test("detects focused editable controls inside open shadow roots", () => {
+  const { Element: FakeElement } = createFakeWindow();
+  const shadowInput = new FakeElement({ tagName: "input", attributes: { type: "text" } });
+  const host = new FakeElement({ shadowRoot: { activeElement: shadowInput } });
+
+  assert.equal(isEditableTarget(host), true);
 });
 
 test("filters visible candidates using geometry and computed style", () => {

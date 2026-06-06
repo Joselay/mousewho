@@ -22,8 +22,7 @@
     "input",
     "textarea",
     "select",
-    "[contenteditable='']",
-    "[contenteditable='true']",
+    "[contenteditable]",
     "[role='textbox']",
     "[role='searchbox']"
   ].join(",");
@@ -31,8 +30,7 @@
   const FOCUSABLE_INPUT_SELECTOR = [
     "input:not([type='hidden'])",
     "textarea",
-    "[contenteditable='']",
-    "[contenteditable='true']",
+    "[contenteditable]:not([contenteditable='false'])",
     "[role='textbox']",
     "[role='searchbox']"
   ].join(",");
@@ -68,7 +66,20 @@
       const type = (element.getAttribute("type") || "text").toLowerCase();
       return !NON_TEXT_INPUT_TYPES.has(type);
     }
+    if (element.getAttribute && element.getAttribute("contenteditable") !== null) {
+      return element.getAttribute("contenteditable").toLowerCase() !== "false";
+    }
     return true;
+  }
+
+  function getShadowActiveElement(element) {
+    let current = element;
+    const seen = new Set();
+    while (current && current.shadowRoot && current.shadowRoot.activeElement && !seen.has(current)) {
+      seen.add(current);
+      current = current.shadowRoot.activeElement;
+    }
+    return current !== element ? current : null;
   }
 
   function isEditableTarget(target) {
@@ -78,10 +89,25 @@
 
     const element = toElement(target);
     if (!element) return false;
+
+    const shadowActive = getShadowActiveElement(element);
+    if (shadowActive && isEditableTarget(shadowActive)) return true;
+
     if (element.isContentEditable) return true;
 
     const editable = element.closest && element.closest(EDITABLE_SELECTOR);
     return Boolean(editable && isTextEditable(editable));
+  }
+
+  function isEditableEventTarget(event) {
+    if (!event) return false;
+    if (event.composedPath) {
+      const path = event.composedPath();
+      for (let i = 0; i < path.length; i += 1) {
+        if (isEditableTarget(path[i])) return true;
+      }
+    }
+    return isEditableTarget(event.target);
   }
 
   function getViewport(element, viewport) {
@@ -189,6 +215,7 @@
     NON_TEXT_INPUT_TYPES,
     collectVisibleCandidates,
     findFirstVisibleInput,
+    isEditableEventTarget,
     isEditableTarget,
     isTextEditable,
     isUsableRect,
