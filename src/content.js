@@ -31,12 +31,14 @@
 
     host = document.getElementById(ROOT_ID) || document.createElement("div");
     host.id = ROOT_ID;
-    host.style.all = "initial";
-    host.style.position = "fixed";
-    host.style.inset = "0";
-    host.style.zIndex = "2147483647";
-    host.style.pointerEvents = "none";
-    host.style.contain = "layout style paint";
+    Object.assign(host.style, {
+      all: "initial",
+      position: "fixed",
+      inset: "0",
+      zIndex: "2147483647",
+      pointerEvents: "none",
+      contain: "layout style paint"
+    });
     (document.documentElement || document.body).appendChild(host);
 
     shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
@@ -103,8 +105,12 @@
 
   function clearPanel(kind) {
     if (!shadow) return;
-    const node = shadow.querySelector(`[data-panel="${kind}"]`);
-    if (node) node.remove();
+    shadow.querySelector(`[data-panel="${kind}"]`)?.remove();
+  }
+
+  function consume(event) {
+    event.preventDefault();
+    event.stopPropagation();
   }
 
   function hud(text, ttl = 900) {
@@ -290,8 +296,7 @@
     if (event.key === "Escape") {
       exitInsertMode();
     } else if (event.ctrlKey && event.key === "[") {
-      event.preventDefault();
-      event.stopPropagation();
+      consume(event);
       exitInsertMode();
     }
   }
@@ -329,10 +334,7 @@
       default: handled = false;
     }
 
-    if (handled) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
+    if (handled) consume(event);
     return handled;
   }
 
@@ -341,14 +343,12 @@
     if (event.ctrlKey || event.metaKey || event.altKey) return false;
 
     if (event.key === "Escape") {
-      event.preventDefault();
-      event.stopPropagation();
+      consume(event);
       stopHints();
       return true;
     }
     if (event.key === "Backspace") {
-      event.preventDefault();
-      event.stopPropagation();
+      consume(event);
       hintState.prefix = hintState.prefix.slice(0, -1);
       updateHintFilter();
       return true;
@@ -356,8 +356,7 @@
 
     const char = event.key.toLowerCase();
     if (char.length === 1 && Hints.DEFAULT_ALPHABET.includes(char)) {
-      event.preventDefault();
-      event.stopPropagation();
+      consume(event);
       hintState.prefix += char;
       updateHintFilter();
       return true;

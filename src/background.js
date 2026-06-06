@@ -23,11 +23,13 @@ async function switchTab(direction) {
 }
 
 async function openTab(url, active) {
-  if (url) await chrome.tabs.create({ url, active: Boolean(active) });
+  if (!url) return;
+  await chrome.tabs.create({ url, active: Boolean(active) });
 }
 
 async function handleRuntimeMessage(message) {
-  const command = message && message.command;
+  if (!message) return;
+  const { command } = message;
   if (hasOwn(TAB_MESSAGE_DIRECTIONS, command)) {
     await switchTab(TAB_MESSAGE_DIRECTIONS[command]);
     return;
