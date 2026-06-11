@@ -6,6 +6,7 @@
 
   const Hints = window.MousewhoHints;
   const Dom = window.MousewhoDom;
+  const extensionApi = globalThis.browser || globalThis.chrome;
   const SCROLL_STEP = 64;
   const HINT_LIMIT = 700;
   const G_SEQUENCE_MS = 650;
@@ -20,7 +21,8 @@
 
   function send(command, payload = {}) {
     try {
-      chrome.runtime.sendMessage({ command, ...payload });
+      const response = extensionApi.runtime.sendMessage({ command, ...payload });
+      if (response && typeof response.catch === "function") response.catch(() => {});
     } catch (_) {
       // The extension context can disappear during reload/update. Ignore it.
     }

@@ -1,5 +1,7 @@
 "use strict";
 
+const extensionApi = globalThis.browser || globalThis.chrome;
+
 const TAB_MESSAGE_DIRECTIONS = Object.freeze({
   nextTab: 1,
   previousTab: -1
@@ -15,16 +17,16 @@ function hasOwn(object, key) {
 }
 
 async function switchTab(direction) {
-  const tabs = await chrome.tabs.query({ currentWindow: true });
+  const tabs = await extensionApi.tabs.query({ currentWindow: true });
   if (!tabs.length) return;
   const currentIndex = tabs.findIndex((tab) => tab.active);
   const nextIndex = (currentIndex + direction + tabs.length) % tabs.length;
-  await chrome.tabs.update(tabs[nextIndex].id, { active: true });
+  await extensionApi.tabs.update(tabs[nextIndex].id, { active: true });
 }
 
 async function openTab(url, active) {
   if (!url) return;
-  await chrome.tabs.create({ url, active: Boolean(active) });
+  await extensionApi.tabs.create({ url, active: Boolean(active) });
 }
 
 async function handleRuntimeMessage(message) {
@@ -43,11 +45,11 @@ function ignoreFailure(promise) {
   });
 }
 
-chrome.runtime.onMessage.addListener((message) => {
+extensionApi.runtime.onMessage.addListener((message) => {
   ignoreFailure(handleRuntimeMessage(message));
 });
 
-chrome.commands.onCommand.addListener((command) => {
+extensionApi.commands.onCommand.addListener((command) => {
   if (hasOwn(TAB_COMMAND_DIRECTIONS, command)) {
     ignoreFailure(switchTab(TAB_COMMAND_DIRECTIONS[command]));
   }

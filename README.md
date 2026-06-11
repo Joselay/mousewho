@@ -1,12 +1,18 @@
 # Mousewho
 
-Mousewho is a Manifest V3 Chrome extension for fast keyboard-only browsing with Vim-style keys. It avoids persistent overlays and only scans the visible page when link hints are requested.
+Mousewho is a Manifest V3 browser extension for fast keyboard-only browsing with Vim-style keys. It avoids persistent overlays and only scans the visible page when link hints are requested.
 
 ## Load in Chrome
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
 3. Click **Load unpacked** and choose this repository.
+
+## Load in Firefox
+
+1. Run `npm run build:firefox`.
+2. Open `about:debugging#/runtime/this-firefox`.
+3. Click **Load Temporary Add-on** and choose `dist/firefox/manifest.json`.
 
 ## Keys
 
@@ -35,7 +41,8 @@ Mousewho is a Manifest V3 Chrome extension for fast keyboard-only browsing with 
 
 ```sh
 npm test
+npm run build:firefox
 npm run benchmark
 ```
 
-The extension has no runtime build step and no npm dependencies.
+The Chrome extension has no runtime build step. The Firefox build copies shared source files into `dist/firefox` with a Firefox-specific manifest. There are no npm dependencies.
